@@ -36,4 +36,11 @@ cluster_name=kubeadm_1
 [devbox]
 10.10.20.20
 
+[drone]
+10.10.20.25
+
+[staticroutes:children]
+devbox
+drone
+
 [nodes:vars]
