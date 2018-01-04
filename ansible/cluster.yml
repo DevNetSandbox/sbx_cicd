@@ -2,38 +2,28 @@
 
 - hosts: localhost
   gather_facts: false
-
   roles:
-
     - role: admission_token
       tags:
         - token
-
   tasks:
-
     - debug:
         var: admission_token
       tags:
         - token
 
-- hosts: "{{ hostvars.localhost.groups.master | join(',') }}"
-
+- hosts: master
   become: true
-
   roles:
-
     - role: kubeadm_install
       tags:
         - repo
         - master
         - nodes          
-
   tasks:
-
     # Implements Step 2 of http://kubernetes.io/docs/getting-started-guides/kubeadm/
-
     - name: Initialize master
-      command: kubeadm init --token {{ hostvars.localhost.admission_token }} --kubernetes-version v1.6.7 --skip-preflight-checks
+      command: kubeadm init --token {{ hostvars.localhost.admission_token }} --kubernetes-version v1.9.0 --skip-preflight-checks
       args:
         creates: /etc/kubernetes/pki
       register: master_init
@@ -41,11 +31,11 @@
       tags:
         - master
         - init
-
     - debug:
         var: master_init.stdout_lines
-
-      # Not 100% sure that the creates clause is correct
+    - set_fact: join_statement={{ master_init.stdout_lines[-1].strip() }}
+    - debug: 
+        var: "{{ hostvars }}"
 
 - hosts: "{{ hostvars.localhost.groups.master | join(',') }}"
   become: true
@@ -88,31 +78,23 @@
 - hosts: "{{ hostvars.localhost.groups.nodes | join(',') }}"
   become: true
   roles:
-
     - role: kubeadm_install
       tags:
         - repo
         - master
         - nodes    
-
   tasks:
-
     # Implements Step 3 of http://kubernetes.io/docs/getting-started-guides/kubeadm/
-
-    - set_fact:
-        master_ip_address: 10.10.20.1
-      when: master_ip_address_configured is defined
-
     - set_fact:
         master_ip_address: 10.10.20.1
       when: master_ip_address_configured is not defined
 
     - name: Join nodes to cluster
-      command: kubeadm join --token {{ hostvars.localhost.admission_token }} {{  master_ip_address }}:6443 --skip-preflight-checks 
+      command: "{{ hostvars['10.10.20.1']['join_statement'] }}"
       args:
         creates: /etc/kubernetes/kubelet.conf
       register: node_join
-      ignore_errors: true
+      ignore_errors: false 
       tags:
         - nodes
         - join
@@ -171,7 +153,7 @@
     - name: setup Kubernetes Dashboard
       command: "{{ item }}"
       with_items:
-        - curl -L -O  https://raw.githubusercontent.com/iceworld/ansible/master/kube-dashboard.yaml
+        #- curl -L -O  https://raw.githubusercontent.com/iceworld/ansible/master/kube-dashboard.yaml
         #- kubectl delete deployment/kube-dns -n kube-system
         - kubectl --kubeconfig /etc/kubernetes/admin.conf create -f ./kube-dashboard.yaml
       register: kube_dashboard

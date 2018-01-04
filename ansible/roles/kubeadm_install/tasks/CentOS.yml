@@ -41,6 +41,9 @@
     name: firewalld 
     state: stopped
 
+- name: disable swap
+  command: swapoff -a
+
 - name: checkmaster
   command: hostname {{ master }}
   when:  ansible_default_ipv4.address   == "{{ master_ip }}"
@@ -50,18 +53,8 @@
   command: hostname {{ worker1 }}
   when: ansible_default_ipv4.address  == "{{ worker1_ip }}"
   ignore_errors: true
-
-- name: checkworker2
-  command: hostname {{ worker2 }}
-  when:  ansible_default_ipv4.address == "{{ worker2_ip }}"
-  ignore_errors: true
-
-- name: checkworker3
-  command: hostname {{ worker3 }}
-  when:  ansible_default_ipv4.address  == "{{ worker3_ip }}"
-  ignore_errors: true
-
 #add end
+
 #
 - name: Reset previous installation 
   command: "{{ item }}"

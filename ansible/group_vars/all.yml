@@ -3,5 +3,4 @@ ansible_ssh_user: root
 ansible_ssh_pass: cisco123
 
 #contiv version
-contiv_ver: 1.1.1
 master_ip_address_configured: 10.10.20.1
