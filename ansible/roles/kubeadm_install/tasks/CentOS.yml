@@ -44,6 +44,9 @@
 - name: disable swap
   command: swapoff -a
 
+- name: enable iptables briding
+  shell: echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+
 - name: checkmaster
   command: hostname {{ master }}
   when:  ansible_default_ipv4.address   == "{{ master_ip }}"

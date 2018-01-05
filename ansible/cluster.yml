@@ -12,7 +12,7 @@
       tags:
         - token
 
-- hosts: master
+- hosts: cluster
   become: true
   roles:
     - role: kubeadm_install
@@ -20,6 +20,8 @@
         - repo
         - master
         - nodes          
+
+- hosts: cluster
   tasks:
     # Implements Step 2 of http://kubernetes.io/docs/getting-started-guides/kubeadm/
     - name: Initialize master
