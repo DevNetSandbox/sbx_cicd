@@ -5,7 +5,7 @@ pipeline:
     repo: drone:5000/cicd-helloworld
     registry: drone:5000
     insecure: true
-    tags: latest
+    tags: "${DRONE_BUILD_NUMBER}"
   deploy:
     image:  devnetsandbox/kube
     kubernetes_server: http://master:8001
@@ -16,4 +16,4 @@ pipeline:
     repo: drone:5000/cicd-helloworld
     registry: drone:5000
     insecure: true
-    tag: latest
+    tag: "${DRONE_BUILD_NUMBER}"
